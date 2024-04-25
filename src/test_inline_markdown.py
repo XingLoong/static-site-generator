@@ -1,8 +1,10 @@
 import unittest 
 from inline_markdown import (
   split_nodes_delimiter,
+  split_nodes_image,
+  split_nodes_link,
   extract_markdown_images,
-  extract_markdown_links
+  extract_markdown_links,
 )
 
 from textnode import (
@@ -10,7 +12,9 @@ from textnode import (
   text_type_text, 
   text_type_bold,
   text_type_italic,
-  text_type_code
+  text_type_code,
+  text_type_link,
+  text_type_image
 )
 
 class TestInlineMarkdown(unittest.TestCase):
@@ -103,6 +107,51 @@ class TestInlineMarkdown(unittest.TestCase):
       ],
       matched
       )
+
+  def test_image_split(self):
+    node = TextNode(
+      "This is text with ![image](https://i.imgur.com/4Uczhus.jpg)", text_type_text
+    )
+    new_node = split_nodes_image([node])
+    self.assertListEqual(
+      [
+        TextNode("This is text with ", text_type_text),
+        TextNode("image", text_type_image, "https://i.imgur.com/4Uczhus.jpg")
+      ],
+      new_node
+    )
+
+  def test_images_split(self):
+    node = TextNode(
+      "This is text with ![image](https://i.imgur.com/4Uczhus.jpg) and another ![second image](https://i.imgur.com/Nrb3rEK.jpg)", text_type_text
+    )
+    new_node = split_nodes_image([node])
+    self.assertListEqual(
+      [
+        TextNode("This is text with ", text_type_text),
+        TextNode("image", text_type_image, "https://i.imgur.com/4Uczhus.jpg"),
+        TextNode(" and another ", text_type_text),
+        TextNode("second image", text_type_image, "https://i.imgur.com/Nrb3rEK.jpg")
+      ],
+      new_node
+    )
+
+  def test_links(self):
+    node = TextNode(
+      "This is text with [link](https://boot.dev) and secondary [second link](https://google.com) and more text", text_type_text
+    )
+    new_node = split_nodes_link([node])
+    self.assertListEqual(
+      [
+        TextNode("This is text with ", text_type_text),
+        TextNode("link", text_type_link, "https://boot.dev"),
+        TextNode(" and secondary ", text_type_text),
+        TextNode("second link", text_type_link, "https://google.com"),
+        TextNode(" and more text", text_type_text)
+      ],
+      new_node
+    )
+
 
 if __name__ == "__main__":
   unittest.main()
