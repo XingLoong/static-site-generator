@@ -1,5 +1,6 @@
 import unittest
 from markdown_blocks import (
+  markdown_to_html_node,
   markdown_to_blocks,
   block_to_block_type,
   block_type_paragraph,
@@ -66,6 +67,81 @@ This is the same paragraph on a new line
     block = "1. first\n2. second\n3. third"
     self.assertEqual(block_to_block_type(block), block_type_olist)
 
+  def test_paragraph(self):
+    test = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+"""
+    node = markdown_to_html_node(test)
+    html = node.to_html()
+    self.assertEqual(
+      "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p></div>",
+      html
+    )
+  
+  def test_paragraphs(self):
+    test = """
+Paragraph 1
+
+Paragraph 2
+
+"""
+    node = markdown_to_html_node(test)
+    html = node.to_html()
+    self.assertEqual(
+      "<div><p>Paragraph 1</p><p>Paragraph 2</p></div>",
+      html
+    )
+  
+  def test_lists(self):
+    test = """
+- This list
+- with multiple
+- *items*
+
+1. This is an `ordered`
+2. list
+3. with stuff
+
+"""
+    node = markdown_to_html_node(test)
+    html = node.to_html()
+    self.assertEqual(
+      "<div><ul><li>This list</li><li>with multiple</li><li><i>items</i></li></ul><ol><li>This is an <code>ordered</code></li><li>list</li><li>with stuff</li></ol></div>",
+      html
+    )
+  
+  def test_headings(self):
+    test = """
+# h1
+
+paragraph
+
+## h2
+"""
+    node = markdown_to_html_node(test)
+    html = node.to_html()
+    self.assertEqual(
+      "<div><h1>h1</h1><p>paragraph</p><h2>h2</h2></div>",
+      html
+    )
+
+
+  def test_quote(self):
+    test = """
+> this
+> is quote
+
+paragraph
+"""
+    node = markdown_to_html_node(test)
+    html = node.to_html()
+    self.assertEqual(
+      "<div><blockquote>this is quote</blockquote><p>paragraph</p></div>",
+      html
+    )
 
 if __name__ == "__main__":
   unittest.main()
